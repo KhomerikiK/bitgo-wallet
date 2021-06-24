@@ -1,6 +1,8 @@
 
 using BitgoWallet.Bitgo.Clients;
 using BitgoWallet.Bitgo.Clients.Interfaces;
+using BitgoWallet.Services;
+using BitgoWallet.Services.Interfaces;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -25,9 +27,9 @@ namespace BitgoWallet
 
             services.AddControllers();
 
+            services.AddScoped<IWalletService, WalletService>();
             services.AddScoped<IBitgoClient, BitgoClient>();
             services.AddScoped<IBitGoExpressClient, BitGoExpressClient>();
-
 
             services.AddSwaggerGen(c =>
             {

@@ -3,8 +3,10 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using BitgoWallet.Bitgo.Objects;
 using BitgoWallet.Dtos;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 
 namespace BitgoWallet.Bitgo.Clients
 {
@@ -35,12 +37,7 @@ namespace BitgoWallet.Bitgo.Clients
                 HttpResponseMessage response = await _httpClient.PostAsync(url, requestContent);
 
                 string content = await response.Content.ReadAsStringAsync();
-
-                return new ResponseDto {
-                    success = response.IsSuccessStatusCode,
-                    message = null,
-                    data = content
-                }; 
+                return wrappResponse(response.IsSuccessStatusCode, content);
             }
             catch (Exception e)
             {    
@@ -58,13 +55,8 @@ namespace BitgoWallet.Bitgo.Clients
             {
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", ApiKey);
                 HttpResponseMessage response = await _httpClient.GetAsync(url);
-
                 string content = await response.Content.ReadAsStringAsync();
-                return new ResponseDto {
-                    success = response.IsSuccessStatusCode,
-                    message = null,
-                    data = content
-                }; 
+                return wrappResponse(response.IsSuccessStatusCode, content);
             }
             catch (Exception e)
             {    
@@ -75,6 +67,17 @@ namespace BitgoWallet.Bitgo.Clients
                 }; 
             }
             
+        }
+
+        private ResponseDto wrappResponse(bool succes, string content){
+            ResponseDto ResponseDto = new ResponseDto {
+                success = succes,
+                message = null,
+                data = content
+            }; 
+            if (!succes)
+                ResponseDto.data = JsonConvert.DeserializeObject<Error>(content);
+            return ResponseDto;
         }
     }
 }
